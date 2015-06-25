@@ -1,54 +1,59 @@
 window.addEventListener('load', function (e) {
     var clockContainer = document.getElementById('clock'),
-        clockId;
+        showTime = true,
+        timeMode,
+        dateMode;
 
-    function addLeadingZero(obj) {
-        var propName;
+    function Clock() {
+        var timeAndDate = new Date();
 
-        for (propName in obj) {
-            if (obj.hasOwnProperty(propName)) {
-                if (obj[propName].toString().length === 1) {
-                    obj[propName] = "0" + obj[propName];
+        this.time = [timeAndDate.getHours(), timeAndDate.getMinutes(), timeAndDate.getSeconds()];
+        this.date = [timeAndDate.getFullYear(), timeAndDate.getMonth() + 1, timeAndDate.getDate()];
+        this.timeToString = function () {
+            var timeWithLeadingZeros = [];
+
+            this.time.forEach(function (elem, index) {
+                if (elem.toString().length === 1) {
+                    timeWithLeadingZeros.push('0' + elem);
+                } else {
+                    timeWithLeadingZeros.push('' + elem);
                 }
-            }
-        }
-        return obj;
-    }
+            });
+            return timeWithLeadingZeros.join(':');
+        };
+        this.dateToString = function () {
+            var dateWithLeadingZeros = [];
 
-    clockId = setInterval(function () {
-        var currentTime = new Date(),
-            time,
-            timeString,
-            propName;
-
-        time = {
-            hours: currentTime.getHours(),
-            minutes: currentTime.getMinutes(),
-            seconds: currentTime.getSeconds()
+            this.date.forEach(function (elem, index) {
+                if (elem.toString().length === 1) {
+                    dateWithLeadingZeros.push('0' + elem);
+                } else {
+                    dateWithLeadingZeros.push('' + elem);
+                }
+            });
+            return dateWithLeadingZeros.join(':');
         };
 
-        addLeadingZero(time);
+        return this;
+    }
 
-        timeString = time.hours + ":" + time.minutes + ":" + time.seconds;
-        return clockContainer.innerHTML = timeString;
-
+    timeMode = setInterval(function () {
+        var clock = new Clock();
+        clockContainer.innerHTML = clock.timeToString();
     }, 1000);
 
     document.addEventListener('mousedown', function (e) {
+        var clockOffsetX = e.offsetX,
+            clockOffsetY = e.offsetY,
+            moveBlock;
+
         if (e.target.id === 'clock') {
-            var clockOffsetX = e.offsetX,
-                clockOffsetY = e.offsetY,
-                currentClockPositionX,
-                currentClockPositionY,
-                moveBlock;
 
             moveBlock = function (e) {
-                currentClockPositionX = parseInt(clockContainer.style.left);
-                currentClockPositionY = parseInt(clockContainer.style.top);
-
                 clockContainer.style.top = e.clientY - clockOffsetY + 'px';
                 clockContainer.style.left = e.clientX - clockOffsetX + 'px';
             };
+
             document.addEventListener('mousemove', moveBlock, false);
             document.addEventListener('mouseup', function (e) {
                 document.removeEventListener('mousemove', moveBlock, false);
@@ -57,54 +62,28 @@ window.addEventListener('load', function (e) {
     }, false);
 
     document.addEventListener('contextmenu', function (e) {
-        var currentTime = new Date(),
-            date,
-            dateString,
-            propName;
-
-        date = {
-            year: currentTime.getFullYear(),
-            month: currentTime.getMonth(),
-            day: currentTime.getDay()
-        };
-
-        addLeadingZero(date);
-
-        dateString = date.year + ":" + date.month + ":" + date.day;
-
         if (e.target.id === 'clock') {
             e.preventDefault();
-            clearInterval(clockId);
-            clockId = null;
-            clockContainer.innerHTML = dateString;
+            clearInterval(timeMode);
+            if (showTime) {
+                dateMode = setInterval(function () {
+                    var clock = new Clock();
+                    clockContainer.innerHTML = clock.dateToString();
+                }, 1000);
+
+                showTime = false;
+            } else {
+                clearInterval(dateMode);
+
+                timeMode = setInterval(function () {
+                    var clock = new Clock();
+                    clockContainer.innerHTML = clock.timeToString();
+                }, 1000);
+
+                showTime = true;
+            }
         }
+
     }, false);
-
-
-    /*document.addEventListener('click', function (e) {
-        if (e.target.id === 'clock') {
-            e.preventDefault();
-            console.log('clicked');
-            clockId = setInterval(function () {
-                var currentTime = new Date(),
-                    time,
-                    timeString,
-                    propName;
-
-                time = {
-                    hours: currentTime.getHours(),
-                    minutes: currentTime.getMinutes(),
-                    seconds: currentTime.getSeconds()
-                };
-
-                addLeadingZero(time);
-
-                timeString = time.hours + ":" + time.minutes + ":" + time.seconds;
-                return clockContainer.innerHTML = timeString;
-
-            }, 1000);
-            dragged = false;
-        }
-    }, false)*/
 
 }, false);
