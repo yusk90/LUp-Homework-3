@@ -1,51 +1,67 @@
 window.addEventListener('load', function (e) {
     var clockContainer = document.getElementById('clock'),
+        clock = new Clock(),
         showTime = true,
-        timeMode,
-        dateMode;
+        timeID,
+        dateID;
 
     function Clock() {
-        var timeAndDate = new Date();
+        var currentTimeAndDate = new Date(),
+            clockID;
 
-        this.time = [timeAndDate.getHours(), timeAndDate.getMinutes(), timeAndDate.getSeconds()];
-        this.date = [timeAndDate.getFullYear(), timeAndDate.getMonth() + 1, timeAndDate.getDate()];
-        this.timeToString = function () {
-            var timeWithLeadingZeros = [];
+        clockID = setInterval(function () {
+            currentTimeAndDate = new Date();
+        }, 1000);
 
-            this.time.forEach(function (elem, index) {
-                if (elem.toString().length === 1) {
-                    timeWithLeadingZeros.push('0' + elem);
-                } else {
-                    timeWithLeadingZeros.push('' + elem);
-                }
-            });
-            return timeWithLeadingZeros.join(':');
+        this.getTime = function () {
+            var time,
+                hours,
+                minutes,
+                seconds;
+
+            hours = currentTimeAndDate.getHours();
+            minutes = currentTimeAndDate.getMinutes();
+            if (minutes < 10) {
+                minutes = '0' + minutes;
+            }
+            seconds = currentTimeAndDate.getSeconds();
+            if (seconds < 10) {
+                seconds = '0' + seconds;
+            }
+            time = hours + ':' + minutes + ':' + seconds;
+
+            return time;
         };
-        this.dateToString = function () {
-            var dateWithLeadingZeros = [];
+        this.getDate = function () {
+            var date,
+                day,
+                month,
+                year;
 
-            this.date.forEach(function (elem, index) {
-                if (elem.toString().length === 1) {
-                    dateWithLeadingZeros.push('0' + elem);
-                } else {
-                    dateWithLeadingZeros.push('' + elem);
-                }
-            });
-            return dateWithLeadingZeros.join(':');
+            day = currentTimeAndDate.getDate();
+            if (day < 10) {
+                day = '0' + day;
+            }
+            month = currentTimeAndDate.getMonth() + 1;
+            if (month < 10) {
+                month = '0' + month;
+            }
+            year = currentTimeAndDate.getFullYear();
+            date = year + ':' + month + ':' + day;
+
+            return date;
         };
 
         return this;
     }
 
-    timeMode = setInterval(function () {
-        var clock = new Clock();
-        clockContainer.innerHTML = clock.timeToString();
-    }, 1000);
-
     document.addEventListener('mousedown', function (e) {
         var clockOffsetX = e.offsetX,
             clockOffsetY = e.offsetY,
             moveBlock;
+
+        //console.log(clockOffsetX + ' ' + clockOffsetY);
+        //console.log(e.clientX + ' ' + e.clientY);
 
         if (e.target.id === 'clock') {
 
@@ -64,26 +80,27 @@ window.addEventListener('load', function (e) {
     document.addEventListener('contextmenu', function (e) {
         if (e.target.id === 'clock') {
             e.preventDefault();
-            clearInterval(timeMode);
             if (showTime) {
-                dateMode = setInterval(function () {
-                    var clock = new Clock();
-                    clockContainer.innerHTML = clock.dateToString();
+                clearInterval(timeID);
+                clockContainer.innerHTML =  clock.getDate();
+                dateID = setInterval(function () {
+                    clockContainer.innerHTML = clock.getDate();
                 }, 1000);
-
                 showTime = false;
             } else {
-                clearInterval(dateMode);
-
-                timeMode = setInterval(function () {
-                    var clock = new Clock();
-                    clockContainer.innerHTML = clock.timeToString();
+                clearInterval(dateID);
+                clockContainer.innerHTML = clock.getTime();
+                timeID = setInterval(function () {
+                    clockContainer.innerHTML = clock.getTime();
                 }, 1000);
-
                 showTime = true;
             }
         }
 
     }, false);
+
+    timeID = setInterval(function () {
+        clockContainer.innerHTML = clock.getTime();
+    }, 1000)
 
 }, false);
