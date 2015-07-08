@@ -1,106 +1,76 @@
 window.addEventListener('load', function (e) {
-    var clockContainer = document.getElementById('clock'),
-        clock = new Clock(),
-        showTime = true,
-        timeID,
-        dateID;
+    var clock;
 
     function Clock() {
-        var currentTimeAndDate = new Date(),
-            clockID;
+        var clockContainer = document.createElement('div'),
+            formatMode = 'time',
+            privateMethods;
 
-        clockID = setInterval(function () {
-            currentTimeAndDate = new Date();
-        }, 1000);
+        clockContainer.id = 'clock';
+        document.body.appendChild(clockContainer);
 
-        this.getTime = function () {
-            var time,
-                hours,
-                minutes,
-                seconds;
-
-            hours = currentTimeAndDate.getHours();
-            minutes = currentTimeAndDate.getMinutes();
-            if (minutes < 10) {
-                minutes = '0' + minutes;
-            }
-            seconds = currentTimeAndDate.getSeconds();
-            if (seconds < 10) {
-                seconds = '0' + seconds;
-            }
-            time = hours + ':' + minutes + ':' + seconds;
-
-            return time;
-        };
-        this.getDate = function () {
-            var date,
-                day,
-                month,
-                year;
-
-            day = currentTimeAndDate.getDate();
-            if (day < 10) {
-                day = '0' + day;
-            }
-            month = currentTimeAndDate.getMonth() + 1;
-            if (month < 10) {
-                month = '0' + month;
-            }
-            year = currentTimeAndDate.getFullYear();
-            date = year + ':' + month + ':' + day;
-
-            return date;
+        privateMethods = {
+            time: getTime,
+            date: getDate
         };
 
-        return this;
-    }
+        this.render = function () {
+            setInterval(function () {
+                clockContainer.innerHTML = format(privateMethods[formatMode]());
+            }, 1000);
+        };
 
-    document.addEventListener('mousedown', function (e) {
-        var clockOffsetX = e.offsetX,
-            clockOffsetY = e.offsetY,
-            moveBlock;
+        function getTime () {
+            var currentTime = new Date();
+            return [currentTime.getHours(), currentTime.getMinutes(), currentTime.getSeconds()];
+        }
 
-        //console.log(clockOffsetX + ' ' + clockOffsetY);
-        //console.log(e.clientX + ' ' + e.clientY);
+        function getDate () {
+            var currentDate = new Date();
+            return [currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate()];
+        }
 
-        if (e.target.id === 'clock') {
+        function addLeadingZero(number) {
+            return (number < 10) ? '0' + number : number;
+        }
 
-            moveBlock = function (e) {
+        function format(arr) {
+            return arr.map(addLeadingZero).join(':');
+        }
+
+        clockContainer.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            if (formatMode === 'time') {
+                clockContainer.innerHTML = format(getDate());
+                formatMode = 'date';
+            } else {
+                clockContainer.innerHTML = format(getTime());
+                formatMode = 'time';
+            }
+            //return formatMode = (formatMode === 'time') ? 'date' : 'time';
+        }, false);
+
+        clockContainer.addEventListener('mousedown', function (e) {
+            var clockOffsetX = e.offsetX,
+                clockOffsetY = e.offsetY,
+                moveClock;
+
+            moveClock = function (e) {
                 clockContainer.style.top = e.clientY - clockOffsetY + 'px';
                 clockContainer.style.left = e.clientX - clockOffsetX + 'px';
             };
 
-            document.addEventListener('mousemove', moveBlock, false);
+            document.addEventListener('mousemove', moveClock, false);
             document.addEventListener('mouseup', function (e) {
-                document.removeEventListener('mousemove', moveBlock, false);
+                document.removeEventListener('mousemove', moveClock, false);
             }, false)
-        }
-    }, false);
 
-    document.addEventListener('contextmenu', function (e) {
-        if (e.target.id === 'clock') {
-            e.preventDefault();
-            if (showTime) {
-                clearInterval(timeID);
-                clockContainer.innerHTML =  clock.getDate();
-                dateID = setInterval(function () {
-                    clockContainer.innerHTML = clock.getDate();
-                }, 1000);
-                showTime = false;
-            } else {
-                clearInterval(dateID);
-                clockContainer.innerHTML = clock.getTime();
-                timeID = setInterval(function () {
-                    clockContainer.innerHTML = clock.getTime();
-                }, 1000);
-                showTime = true;
-            }
-        }
+        }, false);
 
-    }, false);
+        return this;
+    }
 
-    timeID = setInterval(function () {
-        clockContainer.innerHTML = clock.getTime();
-    }, 1000)
+    clock = new Clock();
+    clock.render();
 
 }, false);

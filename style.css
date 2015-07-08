@@ -3,10 +3,6 @@ body, html {
     padding: 0;
 }
 
-.wrapper {
-    position: relative;
-}
-
 #clock {
     position: absolute;
     left: 15px;
