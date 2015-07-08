@@ -15,9 +15,7 @@ window.addEventListener('load', function (e) {
         };
 
         this.init = function () {
-            setInterval(function () {
-                render();
-            }, 1000);
+            setInterval(render, 1000);
         };
 
         function render() {
