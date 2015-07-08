@@ -14,18 +14,22 @@ window.addEventListener('load', function (e) {
             date: getDate
         };
 
-        this.render = function () {
+        this.init = function () {
             setInterval(function () {
-                clockContainer.innerHTML = format(privateMethods[formatMode]());
+                render();
             }, 1000);
         };
 
-        function getTime () {
+        function render() {
+            clockContainer.innerHTML = format(privateMethods[formatMode]());
+        }
+
+        function getTime() {
             var currentTime = new Date();
             return [currentTime.getHours(), currentTime.getMinutes(), currentTime.getSeconds()];
         }
 
-        function getDate () {
+        function getDate() {
             var currentDate = new Date();
             return [currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate()];
         }
@@ -71,6 +75,6 @@ window.addEventListener('load', function (e) {
     }
 
     clock = new Clock();
-    clock.render();
+    clock.init();
 
 }, false);
